@@ -1,0 +1,170 @@
+<div class="oj-hybrid-padding">
+  <h1>Stocks</h1>
+  <div>
+    <oj-toolbar aria-label="Stock actions">
+      <oj-button id="addStockBtn" on-oj-action="[[addStock]]">Add</oj-button>
+      <oj-button id="delStockBtn" on-oj-action="[[delStock]]">Delete</oj-button>
+      <oj-button id="listStockBtn" on-oj-action="[[listStock]]">List</oj-button>
+      <oj-button id="updStockBtn" on-oj-action="[[updateStock]]">Update</oj-button>
+    </oj-toolbar>
+  </div>
+
+  <!-- LIST TABLE -->
+  <table border="1" data-bind="visible: stocks().length > 0 && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+    <thead>
+      <tr>
+        <th>Stock ID</th>
+        <th>Stock Name</th>
+        <th>Stock Price</th>
+        <th>Stock Volume</th>
+        <th>Listing Price</th>
+        <th>Listed Date</th>
+        <th>Listed Exchange</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: stocks">
+      <tr>
+        <td data-bind="text: stockId"></td>
+        <td data-bind="text: stockName"></td>
+        <td data-bind="text: stockPrice"></td>
+        <td data-bind="text: stockVolume"></td>
+        <td data-bind="text: listingPrice"></td>
+        <td data-bind="text: listedDate"></td>
+        <td data-bind="text: listedExchange"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- DELETE TABLE -->
+  <table border="1" data-bind="visible: stocks().length > 0 && showDeleteActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>Stock ID</th>
+        <th>Stock Name</th>
+        <th>Stock Price</th>
+        <th>Stock Volume</th>
+        <th>Listing Price</th>
+        <th>Listed Date</th>
+        <th>Listed Exchange</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: stocks">
+      <tr>
+        <td data-bind="text: stockId"></td>
+        <td data-bind="text: stockName"></td>
+        <td data-bind="text: stockPrice"></td>
+        <td data-bind="text: stockVolume"></td>
+        <td data-bind="text: listingPrice"></td>
+        <td data-bind="text: listedDate"></td>
+        <td data-bind="text: listedExchange"></td>
+        <td>
+          <button data-bind="click: $parent.deleteByRow">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- UPDATE TABLE -->
+  <table border="1" data-bind="visible:stocks().length > 0 && showUpdateActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>Stock ID</th>
+        <th>Stock Name</th>
+        <th>Stock Price</th>
+        <th>Stock Volume</th>
+        <th>Listing Price</th>
+        <th>Listed Date</th>
+        <th>Listed Exchange</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: stocks">
+      <tr>
+        <td data-bind="text: stockId"></td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.stockName" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: stockName"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.stockPrice" type="number" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: stockPrice"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.stockVolume" type="number" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: stockVolume"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.listingPrice" type="number" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: listingPrice"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.listedDate" type="date" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: listedDate"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <input data-bind="value: $parent.editTemp.listedExchange" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <span data-bind="text: listedExchange"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingStockId() === stockId -->
+          <button data-bind="click: function(){$parent.confirmEditStock($data)}">Confirm</button>
+          <button data-bind="click: $parent.cancelEditStock">Cancel</button>
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingStockId() === stockId -->
+          <button data-bind="click: function(){$parent.editStockRow($data)}">Update</button>
+          <!-- /ko -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- ko if: showAddForm -->
+  <div class="oj-panel" style="margin:20px 0; padding:16px;">
+    <div style="display: flex; flex-direction: column; max-width: 300px;">
+      <label>ID:</label>
+      <input type="number" data-bind="value: addStockId" />
+      <label>Name:</label>
+      <input data-bind="value: addStockName" />
+      <label>Price:</label>
+      <oj-input-number value="{{addStockPrice}}" converter="[[priceConverter]]"></oj-input-number>
+      <input data-bind="value: addStockPrice" />
+      <label>Volume:</label>
+      <input data-bind="value: addStockVolume" />
+      <label>Listing Price:</label>
+      <input data-bind="value: addListingPrice" />
+      <label>Listed Date:</label>
+      <input type="date" data-bind="value: addListedDate" />
+      <label>Listed Exchange:</label>
+      <input data-bind="value: addListedExchange" />
+      <div style="margin-top: 10px;">
+        <button data-bind="click: confirmAddStock">Submit</button>
+        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+</div>

@@ -1,0 +1,43 @@
+<!--
+ Copyright (c) 2014, 2025, Oracle and/or its affiliates.
+ Licensed under The Universal Permissive License (UPL), Version 1.0
+ as shown at https://oss.oracle.com/licenses/upl/
+ -->
+<div class="oj-hybrid-padding">
+  <h1>Customers</h1>
+  <div>
+    <oj-toolbar aria-label="Customer actions">
+      <oj-button id="addBtn" on-oj-action="[[addCust]]">Add</oj-button>
+      <oj-button id="delBtn" on-oj-action="[[delCust]]">Delete</oj-button>
+      <oj-button id="listBtn" on-oj-action="[[listCust]]">List</oj-button>
+      <oj-button id="updBtn" on-oj-action="[[updateCust]]">Update</oj-button>
+    </oj-toolbar>
+  </div>
+
+  <div>
+    <table border="1" data-bind="visible:customers().length>0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Phone Number</th>
+          <th>City</th>
+          <th>Email</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: customers">
+        <tr>
+          <td data-bind="text: custId"></td>
+          <td data-bind="text: firstName"></td>
+          <td data-bind="text: lastName"></td>
+          <td data-bind="text: phoneNumber"></td>
+          <td data-bind="text: city"></td>
+          <td data-bind="text: emailId"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+

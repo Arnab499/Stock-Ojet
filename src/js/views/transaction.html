@@ -1,0 +1,43 @@
+<!--
+ Copyright (c) 2014, 2025, Oracle and/or its affiliates.
+ Licensed under The Universal Permissive License (UPL), Version 1.0
+ as shown at https://oss.oracle.com/licenses/upl/
+ -->
+<div class="oj-hybrid-padding">
+  <h1>Transactions</h1>
+  <div>
+    <oj-toolbar aria-label="Transaction actions">
+      <oj-button id="addTxnBtn" on-oj-action="[[addTransaction]]">Add</oj-button>
+      <oj-button id="delTxnBtn" on-oj-action="[[delTransaction]]">Delete</oj-button>
+      <oj-button id="listTxnBtn" on-oj-action="[[listTransaction]]">List</oj-button>
+      <oj-button id="updTxnBtn" on-oj-action="[[updateTransaction]]">Update</oj-button>
+    </oj-toolbar>
+  </div>
+
+  <div>
+    <table border="1" data-bind="visible:transactions().length>0">
+      <thead>
+        <tr>
+          <th>Transaction ID</th>
+          <th>Customer ID</th>
+          <th>Stock ID</th>
+          <th>Transaction Price</th>
+          <th>Transaction Type</th>
+          <th>Quantity</th>
+          <th>Transaction Date</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: transactions">
+        <tr>
+          <td data-bind="text: txnId"></td>
+          <td data-bind="text: custId"></td>
+          <td data-bind="text: stockId"></td>
+          <td data-bind="text: txnPrice"></td>
+          <td data-bind="text: txnType"></td>
+          <td data-bind="text: qty"></td>
+          <td data-bind="text: txnDate"></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
