@@ -1,8 +1,3 @@
-<!--
- Copyright (c) 2014, 2025, Oracle and/or its affiliates.
- Licensed under The Universal Permissive License (UPL), Version 1.0
- as shown at https://oss.oracle.com/licenses/upl/
- -->
 <div class="oj-hybrid-padding">
   <h1>Transactions</h1>
   <div>
@@ -14,30 +9,165 @@
     </oj-toolbar>
   </div>
 
-  <div>
-    <table border="1" data-bind="visible:transactions().length>0">
-      <thead>
-        <tr>
-          <th>Transaction ID</th>
-          <th>Customer ID</th>
-          <th>Stock ID</th>
-          <th>Transaction Price</th>
-          <th>Transaction Type</th>
-          <th>Quantity</th>
-          <th>Transaction Date</th>
-        </tr>
-      </thead>
-      <tbody data-bind="foreach: transactions">
-        <tr>
-          <td data-bind="text: txnId"></td>
-          <td data-bind="text: custId"></td>
-          <td data-bind="text: stockId"></td>
-          <td data-bind="text: txnPrice"></td>
-          <td data-bind="text: txnType"></td>
-          <td data-bind="text: qty"></td>
-          <td data-bind="text: txnDate"></td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- LIST TABLE -->
+  <table border="1"
+         data-bind="visible: transactions().length > 0 && listTxnTable() && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Customer ID</th>
+        <th>Stock ID</th>
+        <th>Transaction Price</th>
+        <th>Transaction Type</th>
+        <th>Quantity</th>
+        <th>Transaction Date</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: transactions">
+      <tr>
+        <td data-bind="text: txnId"></td>
+        <td data-bind="text: custId"></td>
+        <td data-bind="text: stockId"></td>
+        <td data-bind="text: txnPrice"></td>
+        <td data-bind="text: txnType"></td>
+        <td data-bind="text: qty"></td>
+        <td data-bind="text: txnDate"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- DELETE TABLE -->
+  <table border="1"
+         data-bind="visible: transactions().length > 0 && showDeleteActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Customer ID</th>
+        <th>Stock ID</th>
+        <th>Transaction Price</th>
+        <th>Transaction Type</th>
+        <th>Quantity</th>
+        <th>Transaction Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: transactions">
+      <tr>
+        <td data-bind="text: txnId"></td>
+        <td data-bind="text: custId"></td>
+        <td data-bind="text: stockId"></td>
+        <td data-bind="text: txnPrice"></td>
+        <td data-bind="text: txnType"></td>
+        <td data-bind="text: qty"></td>
+        <td data-bind="text: txnDate"></td>
+        <td>
+          <button data-bind="click: $parent.deleteByRow">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- UPDATE TABLE -->
+  <table border="1"
+         data-bind="visible: transactions().length > 0 && showUpdateActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Customer ID</th>
+        <th>Stock ID</th>
+        <th>Transaction Price</th>
+        <th>Transaction Type</th>
+        <th>Quantity</th>
+        <th>Transaction Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: transactions">
+      <tr>
+        <td data-bind="text: txnId"></td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input data-bind="value: $parent.editTemp.custId" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: custId"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input data-bind="value: $parent.editTemp.stockId" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: stockId"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input type="number" data-bind="value: $parent.editTemp.txnPrice" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: txnPrice"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input data-bind="value: $parent.editTemp.txnType" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: txnType"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input type="number" data-bind="value: $parent.editTemp.qty" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: qty"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <input type="date" data-bind="value: $parent.editTemp.txnDate" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <span data-bind="text: txnDate"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingTxnId() === txnId -->
+          <button data-bind="click: function(){$parent.confirmEditTransaction($data)}">Confirm</button>
+          <button data-bind="click: $parent.cancelEditTransaction">Cancel</button>
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingTxnId() === txnId -->
+          <button data-bind="click: function(){$parent.editTxnRow($data)}">Update</button>
+          <!-- /ko -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ko if: showAddForm -->
+  <div class="oj-panel" style="margin:20px 0; padding:16px;">
+    <div style="display: flex; flex-direction: column; max-width: 300px;">
+      <label>Transaction ID:</label>
+      <input data-bind="value: addTxnId" />
+      <label>Customer ID:</label>
+      <input data-bind="value: addCustId" />
+      <label>Stock ID:</label>
+      <input data-bind="value: addStockId" />
+      <label>Transaction Price:</label>
+      <input type="number" data-bind="value: addTxnPrice" />
+      <label>Transaction Type:</label>
+      <input data-bind="value: addTxnType" />
+      <label>Quantity:</label>
+      <input type="number" data-bind="value: addQty" />
+      <label>Transaction Date:</label>
+      <input type="date" data-bind="value: addTxnDate" />
+      <div style="margin-top: 10px;">
+        <button data-bind="click: confirmAddTransaction">Submit</button>
+        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+      </div>
+    </div>
   </div>
+  <!-- /ko -->
 </div>

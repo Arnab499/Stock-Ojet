@@ -1,8 +1,3 @@
-<!--
- Copyright (c) 2014, 2025, Oracle and/or its affiliates.
- Licensed under The Universal Permissive License (UPL), Version 1.0
- as shown at https://oss.oracle.com/licenses/upl/
- -->
 <div class="oj-hybrid-padding">
   <h1>Customers</h1>
   <div>
@@ -14,30 +9,150 @@
     </oj-toolbar>
   </div>
 
-  <div>
-    <table border="1" data-bind="visible:customers().length>0">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>Phone Number</th>
-          <th>City</th>
-          <th>Email</th>
-        </tr>
-      </thead>
-      <tbody data-bind="foreach: customers">
-        <tr>
-          <td data-bind="text: custId"></td>
-          <td data-bind="text: firstName"></td>
-          <td data-bind="text: lastName"></td>
-          <td data-bind="text: phoneNumber"></td>
-          <td data-bind="text: city"></td>
-          <td data-bind="text: emailId"></td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- LIST TABLE -->
+  <table border="1"
+         data-bind="visible: customers().length > 0 && listCustTable() && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>City</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: customers">
+      <tr>
+        <td data-bind="text: custId"></td>
+        <td data-bind="text: firstName"></td>
+        <td data-bind="text: lastName"></td>
+        <td data-bind="text: phoneNumber"></td>
+        <td data-bind="text: city"></td>
+        <td data-bind="text: emailId"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- DELETE TABLE -->
+  <table border="1"
+         data-bind="visible: customers().length > 0 && showDeleteActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>City</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: customers">
+      <tr>
+        <td data-bind="text: custId"></td>
+        <td data-bind="text: firstName"></td>
+        <td data-bind="text: lastName"></td>
+        <td data-bind="text: phoneNumber"></td>
+        <td data-bind="text: city"></td>
+        <td data-bind="text: emailId"></td>
+        <td>
+          <button data-bind="click: $parent.deleteByRow">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- UPDATE TABLE -->
+  <table border="1"
+         data-bind="visible: customers().length > 0 && showUpdateActions() && !showAddForm()">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Phone Number</th>
+        <th>City</th>
+        <th>Email</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody data-bind="foreach: customers">
+      <tr>
+        <td data-bind="text: custId"></td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <input data-bind="value: $parent.editTemp.firstName" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <span data-bind="text: firstName"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <input data-bind="value: $parent.editTemp.lastName" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <span data-bind="text: lastName"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <input data-bind="value: $parent.editTemp.phoneNumber" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <span data-bind="text: phoneNumber"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <input data-bind="value: $parent.editTemp.city" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <span data-bind="text: city"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <input data-bind="value: $parent.editTemp.emailId" />
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <span data-bind="text: emailId"></span>
+          <!-- /ko -->
+        </td>
+        <td>
+          <!-- ko if: $parent.editingCustId() === custId -->
+          <button data-bind="click: function(){$parent.confirmEditCust($data)}">Confirm</button>
+          <button data-bind="click: $parent.cancelEditCust">Cancel</button>
+          <!-- /ko -->
+          <!-- ko ifnot: $parent.editingCustId() === custId -->
+          <button data-bind="click: function(){$parent.editCustRow($data)}">Update</button>
+          <!-- /ko -->
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ko if: showAddForm -->
+  <div class="oj-panel" style="margin:20px 0; padding:16px;">
+    <div style="display: flex; flex-direction: column; max-width: 300px;">
+      <label>ID:</label>
+      <input data-bind="value: addCustId" />
+      <label>First Name:</label>
+      <input data-bind="value: addFirstName" />
+      <label>Last Name:</label>
+      <input data-bind="value: addLastName" />
+      <label>Phone Number:</label>
+      <input data-bind="value: addPhoneNumber" />
+      <label>City:</label>
+      <input data-bind="value: addCity" />
+      <label>Email:</label>
+      <input data-bind="value: addEmailId" />
+      <div style="margin-top: 10px;">
+        <button data-bind="click: confirmAddCust">Submit</button>
+        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+      </div>
+    </div>
   </div>
+  <!-- /ko -->
 </div>
-
-

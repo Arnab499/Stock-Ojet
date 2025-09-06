@@ -1,88 +1,192 @@
-/**
- * @license
- * Copyright (c) 2014, 2025, Oracle and/or its affiliates.
- * Licensed under The Universal Permissive License (UPL), Version 1.0
- * as shown at https://oss.oracle.com/licenses/upl/
- * @ignore
- */
-/*
- * Your customer ViewModel code goes here
- */
-define(['../accUtils','knockout'],
- function(accUtils,ko) {
+define(['../accUtils', 'knockout'],
+  function (accUtils, ko) {
     function CustomerViewModel() {
-
+      // Observables for managing customers and UI state
       this.customers = ko.observableArray([]);
+      this.showAddForm = ko.observable(false);
+      this.showDeleteActions = ko.observable(false);
+      this.showUpdateActions = ko.observable(false);
+      this.listCustTable = ko.observable(true);
+      this.editingCustId = ko.observable(null);
 
+      // Add form observables
+      this.addCustId = ko.observable();
+      this.addFirstName = ko.observable();
+      this.addLastName = ko.observable();
+      this.addPhoneNumber = ko.observable();
+      this.addCity = ko.observable();
+      this.addEmailId = ko.observable();
+
+      // Edit form temporary observables
+      this.editTemp = {
+        firstName: ko.observable(),
+        lastName: ko.observable(),
+        phoneNumber: ko.observable(),
+        city: ko.observable(),
+        emailId: ko.observable()
+      };
+
+      // List customers
       this.listCust = function () {
-        fetch("http://localhost:8080/customers") 
+        this.showAddForm(false);
+        this.showDeleteActions(false);
+        this.showUpdateActions(false);
+        this.listCustTable(true);
+        fetch("http://localhost:8080/customers")
           .then(response => {
-            if (!response.ok) {
-              throw new Error("Network response was not ok");
-            }
+            if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
           })
           .then(data => {
-            this.customers(data);
+            this.customers(Array.isArray(data) ? data : []);
           })
           .catch(error => {
             console.error("Error fetching customers:", error);
             alert("Failed to load customers");
+            this.customers([]);
           });
       }.bind(this);
-      
-      this.addCust=function(){
-        alert("Add Customer")
-      }
 
-      this.delCust=function(){
-        alert("Delete Customer")
-      }
+      // Add Customer Actions
+      this.addCust = function () {
+        this.showAddForm(true);
+        this.showDeleteActions(false);
+        this.showUpdateActions(false);
+        this.listCustTable(false);
+        this.addCustId('');
+        this.addFirstName('');
+        this.addLastName('');
+        this.addPhoneNumber('');
+        this.addCity('');
+        this.addEmailId('');
+      }.bind(this);
 
+      this.confirmAddCust = function () {
+        const custObj = {
+          custId: this.addCustId(),
+          firstName: this.addFirstName(),
+          lastName: this.addLastName(),
+          phoneNumber: this.addPhoneNumber(),
+          city: this.addCity(),
+          emailId: this.addEmailId()
+        };
+        fetch('http://localhost:8080/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(custObj)
+        })
+          .then(r => {
+            if (r.status === 201) {
+              alert('Customer added!');
+              this.showAddForm(false);
+              this.listCust();
+            } else if (r.status === 409) {
+              alert('Customer already exists with this ID.');
+            } else {
+              r.text().then(txt => alert('Add failed: ' + txt));
+            }
+          })
+          .catch(() => alert('Add failed!'));
+      }.bind(this);
 
-      this.updateCust=function(){
-        alert("Update Customer")
-      }
-      
+      // Delete Customer Actions
+      this.delCust = function () {
+        this.showAddForm(false);
+        this.showDeleteActions(true);
+        this.showUpdateActions(false);
+        this.listCustTable(false);
+        fetch('http://localhost:8080/customers')
+          .then(r => r.json())
+          .then(data => this.customers(Array.isArray(data) ? data : []))
+          .catch(() => this.customers([]));
+      }.bind(this);
 
-      // Below are a set of the ViewModel methods invoked by the oj-module component.
-      // Please reference the oj-module jsDoc for additional information.
+      this.deleteByRow = function (customer) {
+        if (!confirm(`Delete customer with ID ${customer.custId}?`)) return;
+        fetch('http://localhost:8080/customers/' + customer.custId, {
+          method: 'DELETE'
+        })
+          .then(response => {
+            if (response.ok) {
+              alert("Customer deleted successfully");
+              this.delCust();
+            } else if (response.status === 404) {
+              alert("Customer not found");
+            } else {
+              alert("Failed to delete customer");
+            }
+          })
+          .catch(error => {
+            alert("Error deleting customer");
+            console.error(error);
+          });
+      }.bind(this);
 
-      /**
-       * Optional ViewModel method invoked after the View is inserted into the
-       * document DOM.  The application can put logic that requires the DOM being
-       * attached here.
-       * This method might be called multiple times - after the View is created
-       * and inserted into the DOM and after the View is reconnected
-       * after being disconnected.
-       */
+      // Update Customer Actions
+      this.updateCust = function () {
+        this.showAddForm(false);
+        this.showDeleteActions(false);
+        this.showUpdateActions(true);
+        this.listCustTable(false);
+        this.editingCustId(null);
+        fetch("http://localhost:8080/customers")
+          .then(response => response.json())
+          .then(data => this.customers(Array.isArray(data) ? data : []))
+          .catch(() => this.customers([]));
+      }.bind(this);
+
+      this.editCustRow = function (customer) {
+        this.editingCustId(customer.custId);
+        this.editTemp.firstName(customer.firstName);
+        this.editTemp.lastName(customer.lastName);
+        this.editTemp.phoneNumber(customer.phoneNumber);
+        this.editTemp.city(customer.city);
+        this.editTemp.emailId(customer.emailId);
+      }.bind(this);
+
+      this.confirmEditCust = function (customer) {
+        const id = customer.custId;
+        const updated = {
+          custId: id,
+          firstName: this.editTemp.firstName(),
+          lastName: this.editTemp.lastName(),
+          phoneNumber: this.editTemp.phoneNumber(),
+          city: this.editTemp.city(),
+          emailId: this.editTemp.emailId()
+        };
+        fetch('http://localhost:8080/customers/' + id, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updated)
+        })
+          .then(r => {
+            if (r.ok) {
+              alert('Customer updated!');
+              this.editingCustId(null);
+              this.updateCust();
+            } else if (r.status === 404) {
+              alert('Customer not found.');
+            } else {
+              r.text().then(txt => alert('Update failed: ' + txt));
+            }
+          })
+          .catch(() => alert('Update failed!'));
+      }.bind(this);
+
+      this.cancelEditCust = function () {
+        this.editingCustId(null);
+      }.bind(this);
+
+      // Lifecycle
       this.connected = () => {
         accUtils.announce('Customers page loaded.', 'assertive');
         document.title = "Customers";
-        // Implement further logic if needed
+        this.listCust();
       };
-
-      /**
-       * Optional ViewModel method invoked after the View is disconnected from the DOM.
-       */
-      this.disconnected = () => {
-        // Implement if needed
-      };
-
-      /**
-       * Optional ViewModel method invoked after transition to the new View is complete.
-       * That includes any possible animation between the old and the new View.
-       */
-      this.transitionCompleted = () => {
-        // Implement if needed
-      };
+      this.disconnected = () => {};
+      this.transitionCompleted = () => {};
     }
 
-    /*
-     * Returns an instance of the ViewModel providing one instance of the ViewModel. If needed,
-     * return a constructor for the ViewModel so that the ViewModel is constructed
-     * each time the view is displayed.
-     */
     return CustomerViewModel;
   }
 );
