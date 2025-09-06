@@ -1,31 +1,23 @@
-/**
- * @license
- * Copyright (c) 2014, 2025, Oracle and/or its affiliates.
- * Licensed under The Universal Permissive License (UPL), Version 1.0
- * as shown at https://oss.oracle.com/licenses/upl/
- * @ignore
- */
-/*
- * Your application specific code will go here
- */
-define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils', 'ojs/ojcorerouter', 'ojs/ojmodulerouter-adapter', 'ojs/ojknockoutrouteradapter', 'ojs/ojurlparamadapter', 'ojs/ojresponsiveutils', 'ojs/ojresponsiveknockoututils', 'ojs/ojarraydataprovider',
-        'ojs/ojdrawerpopup', 'ojs/ojmodule-element', 'ojs/ojknockout'],
-  function(ko, Context, moduleUtils, KnockoutTemplateUtils, CoreRouter, ModuleRouterAdapter, KnockoutRouterAdapter, UrlParamAdapter, ResponsiveUtils, ResponsiveKnockoutUtils, ArrayDataProvider) {
+define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknockouttemplateutils',
+  'ojs/ojcorerouter', 'ojs/ojmodulerouter-adapter', 'ojs/ojknockoutrouteradapter', 'ojs/ojurlparamadapter',
+  'ojs/ojresponsiveutils', 'ojs/ojresponsiveknockoututils', 'ojs/ojarraydataprovider',
+  'ojs/ojdrawerpopup', 'ojs/ojmodule-element', 'ojs/ojknockout'],
+  function (ko, Context, moduleUtils, KnockoutTemplateUtils, CoreRouter, ModuleRouterAdapter,
+    KnockoutRouterAdapter, UrlParamAdapter, ResponsiveUtils, ResponsiveKnockoutUtils, ArrayDataProvider) {
 
-     function ControllerViewModel() {
+    function ControllerViewModel() {
+      var self = this;
 
       this.KnockoutTemplateUtils = KnockoutTemplateUtils;
 
-      // Handle announcements sent when pages change, for Accessibility.
+      // Announcements for accessibility
       this.manner = ko.observable('polite');
       this.message = ko.observable();
-      announcementHandler = (event) => {
-          this.message(event.detail.message);
-          this.manner(event.detail.manner);
+      var announcementHandler = (event) => {
+        this.message(event.detail.message);
+        this.manner(event.detail.manner);
       };
-
       document.getElementById('globalBody').addEventListener('announce', announcementHandler, false);
-
 
       // Media queries for responsive layouts
       const smQuery = ResponsiveUtils.getFrameworkQuery(ResponsiveUtils.FRAMEWORK_QUERY_KEY.SM_ONLY);
@@ -33,57 +25,116 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
       const mdQuery = ResponsiveUtils.getFrameworkQuery(ResponsiveUtils.FRAMEWORK_QUERY_KEY.MD_UP);
       this.mdScreen = ResponsiveKnockoutUtils.createMediaQueryObservable(mdQuery);
 
-      let navData = [
-        { path: '', redirect: 'Stock' },
+      /** 1. Router main navData contains ALL routes registered */
+      var navData = [
+        { path: '', redirect: 'login' }, // default route is login
+        { path: 'login', detail: { label: 'Login', iconClass: 'oj-ux-ico-login' } },
         { path: 'Stock', detail: { label: 'Stock', iconClass: 'oj-ux-ico-bar-chart' } },
         { path: 'customers', detail: { label: 'Customers', iconClass: 'oj-ux-ico-contact-group' } },
         { path: 'transaction', detail: { label: 'Transactions', iconClass: 'oj-ux-ico-fire' } },
         { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
       ];
 
-      // Router setup
-      let router = new CoreRouter(navData, {
-        urlAdapter: new UrlParamAdapter()
-      });
-      router.sync();
+      /** 2. Create the router on ALL route states */
+      this.router = new CoreRouter(navData, { urlAdapter: new UrlParamAdapter() });
+      this.moduleAdapter = new ModuleRouterAdapter(this.router);
+      this.selection = new KnockoutRouterAdapter(this.router);
 
-      this.moduleAdapter = new ModuleRouterAdapter(router);
+      /** 3. Navigation is only for visible tabs (based on role) */
+      this.navDataArray = ko.observableArray([]);
+      this.navDataProvider = new ArrayDataProvider(this.navDataArray, { keyAttributes: "path" });
 
-      this.selection = new KnockoutRouterAdapter(router);
+      /** 4. Role-based tab rendering (do NOT unregister routes) */
+      this.updateNavForRole = function () {
+        var role = sessionStorage.getItem('role');
+        if (role === 'ADMIN') {
+          self.navDataArray([
+            { path: 'Stock', detail: { label: 'Stock', iconClass: 'oj-ux-ico-bar-chart' } },
+            { path: 'customers', detail: { label: 'Customers', iconClass: 'oj-ux-ico-contact-group' } },
+            { path: 'transaction', detail: { label: 'Transactions', iconClass: 'oj-ux-ico-fire' } },
+            { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
+          ]);
+        } else if (role === 'CUSTOMER') {
+          self.navDataArray([
+            { path: 'Stock', detail: { label: 'Stock', iconClass: 'oj-ux-ico-bar-chart' } },
+            { path: 'transaction', detail: { label: 'Transactions', iconClass: 'oj-ux-ico-fire' } },
+            { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
+          ]);
+        } else {
+          self.navDataArray([
+            { path: 'login', detail: { label: 'Login', iconClass: 'oj-ux-ico-login' } }
+          ]);
+        }
+      };
 
-      // Setup the navDataProvider with the routes, excluding the first redirected
-      // route.
-      this.navDataProvider = new ArrayDataProvider(navData.slice(1), {keyAttributes: "path"});
+      // Initial navigation setup (might be before any login)
+      this.updateNavForRole();
 
-      // Drawer
-      self.sideDrawerOn = ko.observable(false);
-
-      // Close drawer on medium and larger screens
-      this.mdScreen.subscribe(() => { self.sideDrawerOn(false) });
-
-      // Called by navigation drawer toggle button and after selection of nav drawer item
+      /** 5. Drawer handling */
+      this.sideDrawerOn = ko.observable(false);
+      this.mdScreen.subscribe(() => { self.sideDrawerOn(false); });
       this.toggleDrawer = () => {
         self.sideDrawerOn(!self.sideDrawerOn());
-      }
+      };
 
-      // Header
-      // Application Name used in Branding Area
+      // Application Name and User Info
       this.appName = ko.observable("Stock Manager");
-      // User Info used in Global Navigation area
-      this.userLogin = ko.observable("arnabbhowmik499@gmail.com");
+      this.userLogin = ko.observable("");
 
-      // Footer
-      // this.footerLinks = [
-      //   {name: 'About Oracle', linkId: 'aboutOracle', linkTarget:'http://www.oracle.com/us/corporate/index.html#menu-about'},
-      //   { name: "Contact Us", id: "contactUs", linkTarget: "http://www.oracle.com/us/corporate/contact/index.html" },
-      //   { name: "Legal Notices", id: "legalNotices", linkTarget: "http://www.oracle.com/us/legal/index.html" },
-      //   { name: "Terms Of Use", id: "termsOfUse", linkTarget: "http://www.oracle.com/us/legal/terms/index.html" },
-      //   { name: "Your Privacy Rights", id: "yourPrivacyRights", linkTarget: "http://www.oracle.com/us/legal/privacy/index.html" },
-      // ];
-     }
-     // release the application bootstrap busy state
-     Context.getPageContext().getBusyContext().applicationBootstrapComplete();
+      // Update user login name on login
+      this.setUserInfo = function (email) {
+        self.userLogin(email);
+      };
 
-     return new ControllerViewModel();
-  }
-);
+      /** 6. Route Guard: Use currentState.subscribe() */
+      this.router.currentState.subscribe(function (args) {
+        // Only allow login to be accessed if not logged in
+        if (!sessionStorage.getItem('jwt') && args.state && args.state.id !== 'login') {
+          self.router.go('login');
+        }
+        // Block customers page for non-admins (even if nav is hidden, users can still enter URL manually)
+        if (args.state && args.state.id === 'customers') {
+          var role = sessionStorage.getItem('role');
+          if (role !== 'ADMIN') {
+            self.router.go('Stock');
+          }
+        }
+        // Optionally, you can add other route guards here...
+      });
+
+      // In your ControllerViewModel (appController.js):
+      this.logout = function () {
+        sessionStorage.clear();
+        self.updateNavForRole();
+        self.userLogin("");        // Clear displayed user
+        self.router.go('login');  // Redirect to login page
+      };
+
+      // Existing code above...
+
+      this.handleUserMenuAction = function (event) {
+        let value = event.detail && event.detail.value;
+        if (!value && event.originalEvent && event.originalEvent.detail && event.originalEvent.detail.value) {
+          value = event.originalEvent.detail.value;
+        }
+        if (!value && event.target && event.target.textContent) {
+          let txt = event.target.textContent.trim().toLowerCase();
+          if (txt === "sign out") value = "out";
+        }
+
+        console.log('DEBUG menu action event:', event, 'RESOLVED value:', value);
+        if (value === 'out') {
+          self.logout();
+        }
+        // handle others as needed
+      };
+
+      // Start router after defining guards/listeners!
+      this.router.sync();
+
+      // release the application bootstrap busy state
+      Context.getPageContext().getBusyContext().applicationBootstrapComplete();
+    }
+
+    return new ControllerViewModel();
+  });

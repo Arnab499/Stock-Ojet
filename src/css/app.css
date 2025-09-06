@@ -48,3 +48,181 @@ html[dir="rtl"] .demo-oracle-icon {
       transform:translate(-25%, -25%) scale(0.5)
   }
 }
+
+/* --- Stylish Stock Module CSS --- */
+.oj-hybrid-padding {
+  background: #f6f8fa;
+  border-radius: 14px;
+  padding: 32px;
+  margin: 36px auto;
+  box-shadow: 0 5px 18px 0 rgba(0,0,0,0.11);
+  max-width: 1100px;
+}
+
+.stocks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.stocks-header h1 {
+  font-size: 2.2em;
+  font-weight: 700;
+  margin: 0;
+  color: #2d3a51;
+  letter-spacing: 1px;
+}
+
+.stocks-toolbar {
+  display: flex;
+  gap: 10px;
+}
+
+.oj-hybrid-padding table {
+  border-collapse: collapse;
+  width: 100%;
+  background: #fff;
+  margin-top: 24px;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.07);
+}
+
+.oj-hybrid-padding th,
+.oj-hybrid-padding td {
+  border: none;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.oj-hybrid-padding th {
+  background: #f0f4f8;
+  font-weight: 600;
+  color: #223050;
+  border-bottom: 2px solid #e1e5ea;
+}
+
+.oj-hybrid-padding tr {
+  border-bottom: 1px solid #eaeaea;
+  transition: background 0.23s;
+}
+
+.oj-hybrid-padding tr:hover {
+  background: #f7fbff;
+}
+
+.oj-hybrid-padding button, .oj-hybrid-padding .oj-button {
+  background-color: #1a73e8;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 14px;
+  margin-right: 4px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.17s;
+}
+.oj-hybrid-padding button:last-child, .oj-hybrid-padding .oj-button:last-child {
+  margin-right: 0;
+}
+.oj-hybrid-padding button:hover, .oj-hybrid-padding .oj-button:hover {
+  background-color: #155ac1;
+}
+
+.oj-panel {
+  border-radius: 10px;
+  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.09);
+  background: #fafcff;
+  transition: box-shadow 0.2s;
+}
+
+.oj-panel label {
+  font-size: 0.95em;
+  color: #345;
+  margin-bottom: 2px;
+  margin-top: 6px;
+}
+
+.oj-panel input[type="text"],
+.oj-panel input[type="number"],
+.oj-panel input[type="date"],
+.oj-panel oj-input-number,
+.oj-panel oj-input-text {
+  padding: 7px;
+  border: 1px solid #cbd3dd;
+  border-radius: 5px;
+  margin-bottom: 11px;
+  font-size: 1em;
+}
+
+.oj-panel button {
+  margin-right: 10px;
+}
+
+/* --- Login Form Beautiful/Modern Styles --- */
+.stylish-login-container {
+  background: #ffffff;
+  padding: 36px 30px 28px 30px;
+  margin: 70px auto 0 auto;
+  max-width: 350px;
+  box-shadow: 0 6px 32px 0 rgba(30,50,115,0.11);
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stylish-login-container h2 {
+  font-size: 2em;
+  font-weight: bold;
+  color: #3f51b5;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+
+.stylish-login-container input[type="text"],
+.stylish-login-container input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #bfc6db;
+  border-radius: 7px;
+  margin-bottom: 19px;
+  font-size: 1.1em;
+  outline: none;
+  transition: border 0.2s;
+  background: #f4f8fd;
+}
+.stylish-login-container input[type="text"]:focus,
+.stylish-login-container input[type="password"]:focus {
+  border: 1.5px solid #3f51b5;
+}
+
+.stylish-login-container button {
+  width: 100%;
+  background: linear-gradient(90deg, #3f51b5 0%, #1a73e8 100%);
+  color: #fff;
+  padding: 12px;
+  font-size: 1.1em;
+  border: none;
+  border-radius: 7px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  cursor: pointer;
+  margin-bottom: 7px;
+  transition: background 0.17s, opacity 0.13s;
+}
+.stylish-login-container button:hover {
+  opacity: 0.93;
+  background: linear-gradient(90deg, #283593 0%, #1565c0 100%);
+}
+
+.stylish-login-container .error-message {
+  color: #e53935;
+  margin-top: 8px;
+  font-size: 1.05em;
+  min-height: 28px;
+  width: 100%;
+  text-align: center;
+  letter-spacing: 0.5px;
+}

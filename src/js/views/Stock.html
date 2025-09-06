@@ -1,16 +1,20 @@
 <div class="oj-hybrid-padding">
-  <h1>Stocks</h1>
-  <div>
-    <oj-toolbar aria-label="Stock actions">
-      <oj-button id="addStockBtn" on-oj-action="[[addStock]]">Add</oj-button>
-      <oj-button id="delStockBtn" on-oj-action="[[delStock]]">Delete</oj-button>
-      <oj-button id="listStockBtn" on-oj-action="[[listStock]]">List</oj-button>
-      <oj-button id="updStockBtn" on-oj-action="[[updateStock]]">Update</oj-button>
-    </oj-toolbar>
+  <div class="stocks-header">
+    <h1>Stocks</h1>
+    <div>
+      <oj-toolbar aria-label="Stock actions">
+        <oj-button id="addStockBtn" on-oj-action="[[addStock]]">Add</oj-button>
+        <oj-button id="delStockBtn" on-oj-action="[[delStock]]">Delete</oj-button>
+        <oj-button id="listStockBtn" on-oj-action="[[listStock]]">List</oj-button>
+        <oj-button id="updStockBtn" on-oj-action="[[updateStock]]">Update</oj-button>
+        <oj-button on-oj-action="[[showTrendsChart]]">Trends</oj-button>
+      </oj-toolbar>
+    </div>
   </div>
 
   <!-- LIST TABLE -->
-  <table border="1" data-bind="visible: stocks().length > 0 && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+  <table border="1"
+    data-bind="visible: stocks().length > 0 && !showAddForm() && !showDeleteActions() && !showUpdateActions() && liststk()">
     <thead>
       <tr>
         <th>Stock ID</th>
@@ -167,4 +171,21 @@
     </div>
   </div>
   <!-- /ko -->
+  <!-- STOCKS PRICE COMPARISON CHART -->
+  <div data-bind="visible: showTrends">
+  <div style="margin-bottom:32px;">
+  <oj-chart id="stocksBarChart"
+            type="bar"
+            orientation="vertical"
+            series="[[chartSeries]]"
+            groups="[[chartGroups]]"
+            animation-on-display="auto"
+            animation-on-data-change="auto"
+            style="height:330px;">
+    <template slot="seriesTemplate" data-oj-as="item">
+      <oj-chart-series color="[[item.seriesIndex === 0 ? '#29b6f6' : '#66bb6a']]"></oj-chart-series>
+    </template>
+  </oj-chart>
+</div>
+  </div>
 </div>
