@@ -1,52 +1,13 @@
-/*
-    Document   : override
-    Created on : <date>
-    Author     : <author>
-    Description:
-        This is where any of your application specific styles should be included
-*/
-
-.send-off-screen {
-  position: absolute;
-  left: -10000px;
-  top: auto;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-}
-
-.demo-oracle-icon {
-  width:137px;
-  height:18px;
-  content:url("images/oracle_logo.svg")
-}
-
-html:not([dir="rtl"]) .demo-oracle-icon {
-  padding-right:4px
-}
-
-html[dir="rtl"] .demo-oracle-icon {
-  padding-left:4px
-}
-
-.demo-oracle-icon:before {
-  display:inline
-}
-
-.demo-appheader-avatar {
-  width:24px;
-  height:24px
-}
-
-.demo-appheader-avatar:before {
-  content:url("images/avatar_24px.png")
-}
+/* --- Oracle/Branding Defaults & Core Styles --- */
+.send-off-screen { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.demo-oracle-icon { width:137px; height:18px; content:url("images/oracle_logo.svg") }
+html:not([dir="rtl"]) .demo-oracle-icon { padding-right:4px }
+html[dir="rtl"] .demo-oracle-icon { padding-left:4px }
+.demo-oracle-icon:before { display:inline }
+.demo-appheader-avatar { width:24px; height:24px }
+.demo-appheader-avatar:before { content:url("images/avatar_24px.png") }
 @media (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 144dpi), (min-resolution: 1.5dppx) {
-  .demo-appheader-avatar:before {
-      content:url("images/avatar_24px_2x.png");
-      -webkit-transform:translate(-25%, -25%) scale(0.5);
-      transform:translate(-25%, -25%) scale(0.5)
-  }
+  .demo-appheader-avatar:before { content:url("images/avatar_24px_2x.png"); -webkit-transform:translate(-25%, -25%) scale(0.5); transform:translate(-25%, -25%) scale(0.5) }
 }
 
 /* --- Stylish Stock Module CSS --- */
@@ -58,171 +19,348 @@ html[dir="rtl"] .demo-oracle-icon {
   box-shadow: 0 5px 18px 0 rgba(0,0,0,0.11);
   max-width: 1100px;
 }
-
-.stocks-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
+.stocks-header, .customers-header, .transactions-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;
+}
+.stocks-header h1, .customers-header h1, .transactions-header h1 {
+  font-size: 2.2em; font-weight: 700; margin: 0; color: #2d3a51; letter-spacing: 1px;
+}
+.stocks-toolbar, .customers-toolbar, .transactions-toolbar {
+  display: flex; gap: 10px;
 }
 
-.stocks-header h1 {
-  font-size: 2.2em;
-  font-weight: 700;
-  margin: 0;
-  color: #2d3a51;
-  letter-spacing: 1px;
-}
-
-.stocks-toolbar {
-  display: flex;
-  gap: 10px;
-}
-
+/* Table styling */
 .oj-hybrid-padding table {
-  border-collapse: collapse;
-  width: 100%;
-  background: #fff;
-  margin-top: 24px;
-  border-radius: 6px;
-  overflow: hidden;
-  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.07);
+  border-collapse: collapse; width: 100%; background: #fff; margin-top: 24px; border-radius: 6px; overflow: hidden; box-shadow: 0 1px 6px 0 rgba(0,0,0,0.07);
 }
-
-.oj-hybrid-padding th,
-.oj-hybrid-padding td {
-  border: none;
-  padding: 10px 12px;
-  text-align: left;
+.oj-hybrid-padding th, .oj-hybrid-padding td {
+  border: none; padding: 10px 12px; text-align: left;
 }
-
 .oj-hybrid-padding th {
-  background: #f0f4f8;
-  font-weight: 600;
-  color: #223050;
-  border-bottom: 2px solid #e1e5ea;
+  background: #f0f4f8; font-weight: 600; color: #223050; border-bottom: 2px solid #e1e5ea;
 }
-
 .oj-hybrid-padding tr {
-  border-bottom: 1px solid #eaeaea;
-  transition: background 0.23s;
+  border-bottom: 1px solid #eaeaea; transition: background 0.23s;
 }
+.oj-hybrid-padding tr:hover { background: #f7fbff; }
 
-.oj-hybrid-padding tr:hover {
-  background: #f7fbff;
+/* Updated button colors to #833AB4 */
+.oj-hybrid-padding button, .oj-hybrid-padding .oj-button, .customers-toolbar button, .transactions-toolbar button {
+  background-color: #833AB4; color: #fff; border: none; border-radius: 5px; padding: 6px 14px; margin-right: 4px; font-weight: 600; cursor: pointer; transition: background 0.17s;
 }
-
-.oj-hybrid-padding button, .oj-hybrid-padding .oj-button {
-  background-color: #1a73e8;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 6px 14px;
-  margin-right: 4px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.17s;
-}
-.oj-hybrid-padding button:last-child, .oj-hybrid-padding .oj-button:last-child {
+.oj-hybrid-padding button:last-child, .oj-hybrid-padding .oj-button:last-child, .customers-toolbar button:last-child, .transactions-toolbar button:last-child {
   margin-right: 0;
 }
-.oj-hybrid-padding button:hover, .oj-hybrid-padding .oj-button:hover {
-  background-color: #155ac1;
+.oj-hybrid-padding button:hover, .oj-hybrid-padding .oj-button:hover, .customers-toolbar button:hover, .transactions-toolbar button:hover {
+  background-color: #6d2f94; /* darker shade for hover */
 }
 
 .oj-panel {
-  border-radius: 10px;
-  box-shadow: 0 2px 12px 0 rgba(0,0,0,0.09);
-  background: #fafcff;
-  transition: box-shadow 0.2s;
+  border-radius: 10px; box-shadow: 0 2px 12px 0 rgba(0,0,0,0.09); background: #fafcff; transition: box-shadow 0.2s;
 }
-
 .oj-panel label {
-  font-size: 0.95em;
-  color: #345;
-  margin-bottom: 2px;
-  margin-top: 6px;
+  font-size: 0.95em; color: #345; margin-bottom: 2px; margin-top: 6px;
 }
-
-.oj-panel input[type="text"],
-.oj-panel input[type="number"],
-.oj-panel input[type="date"],
-.oj-panel oj-input-number,
-.oj-panel oj-input-text {
-  padding: 7px;
-  border: 1px solid #cbd3dd;
-  border-radius: 5px;
-  margin-bottom: 11px;
-  font-size: 1em;
+.oj-panel input[type="text"], .oj-panel input[type="number"], .oj-panel input[type="date"], .oj-panel oj-input-number, .oj-panel oj-input-text {
+  padding: 7px; border: 1px solid #cbd3dd; border-radius: 5px; margin-bottom: 11px; font-size: 1em;
 }
-
-.oj-panel button {
-  margin-right: 10px;
-}
+.oj-panel button { margin-right: 10px; }
 
 /* --- Login Form Beautiful/Modern Styles --- */
 .stylish-login-container {
-  background: #ffffff;
-  padding: 36px 30px 28px 30px;
-  margin: 70px auto 0 auto;
-  max-width: 350px;
-  box-shadow: 0 6px 32px 0 rgba(30,50,115,0.11);
-  border-radius: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  background: #ffffff; padding: 36px 30px 28px 30px; margin: 70px auto 0 auto; max-width: 350px;
+  box-shadow: 0 6px 32px 0 rgba(30,50,115,0.11); border-radius: 15px; display: flex; flex-direction: column; align-items: center;
 }
-
 .stylish-login-container h2 {
-  font-size: 2em;
-  font-weight: bold;
-  color: #3f51b5;
-  margin-bottom: 18px;
-  letter-spacing: 1px;
+  font-size: 2em; font-weight: bold; color: #3f51b5; margin-bottom: 18px; letter-spacing: 1px;
 }
-
-.stylish-login-container input[type="text"],
-.stylish-login-container input[type="password"] {
-  width: 100%;
-  padding: 10px 14px;
-  border: 1px solid #bfc6db;
-  border-radius: 7px;
-  margin-bottom: 19px;
-  font-size: 1.1em;
-  outline: none;
-  transition: border 0.2s;
-  background: #f4f8fd;
+.stylish-login-container input[type="text"], .stylish-login-container input[type="password"] {
+  width: 100%; padding: 10px 14px; border: 1px solid #bfc6db; border-radius: 7px; margin-bottom: 19px; font-size: 1.1em; outline: none; transition: border 0.2s; background: #f4f8fd;
 }
-.stylish-login-container input[type="text"]:focus,
-.stylish-login-container input[type="password"]:focus {
+.stylish-login-container input[type="text"]:focus, .stylish-login-container input[type="password"]:focus {
   border: 1.5px solid #3f51b5;
 }
-
 .stylish-login-container button {
-  width: 100%;
-  background: linear-gradient(90deg, #3f51b5 0%, #1a73e8 100%);
-  color: #fff;
-  padding: 12px;
-  font-size: 1.1em;
-  border: none;
-  border-radius: 7px;
-  font-weight: bold;
-  letter-spacing: 1px;
-  cursor: pointer;
-  margin-bottom: 7px;
-  transition: background 0.17s, opacity 0.13s;
+  width: 100%; background: linear-gradient(90deg, #833AB4 0%, #6d2f94 100%);
+  color: #fff; padding: 12px; font-size: 1.1em; border: none; border-radius: 7px; font-weight: bold; letter-spacing: 1px;
+  cursor: pointer; margin-bottom: 7px; transition: background 0.17s, opacity 0.13s;
 }
 .stylish-login-container button:hover {
-  opacity: 0.93;
-  background: linear-gradient(90deg, #283593 0%, #1565c0 100%);
+  opacity: 0.93; background: linear-gradient(90deg, #6d2f94 0%, #5a257a 100%);
+}
+.stylish-login-container .error-message {
+  color: #e53935; margin-top: 8px; font-size: 1.05em; min-height: 28px; width: 100%; text-align: center; letter-spacing: 0.5px;
 }
 
-.stylish-login-container .error-message {
-  color: #e53935;
-  margin-top: 8px;
+/* --- Modern Add Customer Panel Styles --- */
+.add-customer-panel {
+  background: #fff;
+  box-shadow: 0 4px 24px 0 rgba(125,89,213,0.11);
+  border-radius: 16px;
+  padding: 34px 34px 22px 34px;
+  max-width: 350px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.add-customer-panel label {
   font-size: 1.05em;
-  min-height: 28px;
-  width: 100%;
+  font-weight: 500;
+  color: #5f478b;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  letter-spacing: 0.2px;
+  transition: color 0.15s;
+}
+
+.add-customer-panel input[type="text"],
+.add-customer-panel input[type="number"],
+.add-customer-panel input[type="date"],
+.add-customer-panel input[type="email"] {
+  background: #f6f2fb;
+  border: 1.6px solid #e0dbf6;
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.add-customer-panel input[type="text"]:focus,
+.add-customer-panel input[type="number"]:focus,
+.add-customer-panel input[type="date"]:focus,
+.add-customer-panel input[type="email"]:focus {
+  border: 2px solid #833ab4;
+  box-shadow: 0 0 0 2px rgba(131,58,180, 0.12);
+  background: #f9f7fd;
+}
+
+.add-customer-panel .button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+}
+
+.add-customer-panel button {
+  flex: 1;
+  background: linear-gradient(90deg, #833ab4 0%, #6d2f94 100%);
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.08em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.17s, opacity 0.13s;
+  letter-spacing: .5px;
+}
+
+.add-customer-panel button:hover {
+  opacity: 0.95;
+  background: linear-gradient(90deg, #6d2f94 0%, #5a257a 100%);
+}
+
+.add-customer-panel input[type="text"]::placeholder,
+.add-customer-panel input[type="email"]::placeholder,
+.add-customer-panel input[type="number"]::placeholder {
+  color: #b39ddb;
+  opacity: 1;
+  font-size: 0.98em;
+}
+
+.add-customer-title {
   text-align: center;
-  letter-spacing: 0.5px;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #6d2f94;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+/* Responsive: shrink side padding on smaller screens */
+@media (max-width: 500px) {
+  .add-customer-panel {
+    padding: 18px 10px 15px 10px;
+    max-width: 100%;
+  }
+}
+/* --- Modern Add Stocks Panel Styles --- */
+.add-stock-panel {
+  background: #fff;
+  box-shadow: 0 4px 24px 0 rgba(125,89,213,0.11);
+  border-radius: 16px;
+  padding: 34px 34px 22px 34px;
+  max-width: 370px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.add-stock-title {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #833ab4;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.add-stock-panel label {
+  font-size: 1.05em;
+  font-weight: 500;
+  color: #5f478b;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  letter-spacing: 0.2px;
+}
+
+.add-stock-panel input[type="text"],
+.add-stock-panel input[type="number"] {
+  background: #f6f2fb;
+  border: 1.6px solid #e0dbf6;
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.add-stock-panel input[type="text"]:focus,
+.add-stock-panel input[type="number"]:focus {
+  border: 2px solid #833ab4;
+  box-shadow: 0 0 0 2px rgba(131,58,180, 0.12);
+  background: #f9f7fd;
+}
+
+.add-stock-panel .button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+}
+
+.add-stock-panel button {
+  flex: 1;
+  background: linear-gradient(90deg, #833ab4 0%, #6d2f94 100%);
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.08em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.17s, opacity 0.13s;
+  letter-spacing: .5px;
+}
+
+.add-stock-panel button:hover {
+  opacity: 0.95;
+  background: linear-gradient(90deg, #6d2f94 0%, #5a257a 100%);
+}
+
+.add-stock-panel input[type="text"]::placeholder,
+.add-stock-panel input[type="number"]::placeholder {
+  color: #b39ddb;
+  opacity: 1;
+  font-size: 0.98em;
+}
+
+@media (max-width: 500px) {
+  .add-stock-panel { padding: 18px 10px 15px 10px; max-width: 100%; }
+}
+
+/* --- Modern Add Transactions Panel Styles --- */
+.add-transaction-panel {
+  background: #fff;
+  box-shadow: 0 4px 24px 0 rgba(125,89,213,0.11);
+  border-radius: 16px;
+  padding: 34px 34px 22px 34px;
+  max-width: 420px;
+  margin: 30px auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.add-transaction-title {
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: 700;
+  color: #6d2f94;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.add-transaction-panel label {
+  font-size: 1.05em;
+  font-weight: 500;
+  color: #5f478b;
+  margin-bottom: 6px;
+  margin-top: 14px;
+  letter-spacing: 0.2px;
+}
+
+.add-transaction-panel input[type="text"],
+.add-transaction-panel input[type="number"],
+.add-transaction-panel input[type="date"] {
+  background: #f6f2fb;
+  border: 1.6px solid #e0dbf6;
+  border-radius: 7px;
+  padding: 10px 12px;
+  font-size: 1.1em;
+  margin-bottom: 5px;
+  transition: border 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+
+.add-transaction-panel input[type="text"]:focus,
+.add-transaction-panel input[type="number"]:focus,
+.add-transaction-panel input[type="date"]:focus {
+  border: 2px solid #833ab4;
+  box-shadow: 0 0 0 2px rgba(131,58,180, 0.12);
+  background: #f9f7fd;
+}
+
+.add-transaction-panel .button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 14px;
+}
+
+.add-transaction-panel button {
+  flex: 1;
+  background: linear-gradient(90deg, #833ab4 0%, #6d2f94 100%);
+  color: #fff;
+  padding: 12px;
+  border: none;
+  border-radius: 7px;
+  font-size: 1.08em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.17s, opacity 0.13s;
+  letter-spacing: .5px;
+}
+
+.add-transaction-panel button:hover {
+  opacity: 0.95;
+  background: linear-gradient(90deg, #6d2f94 0%, #5a257a 100%);
+}
+
+.add-transaction-panel input[type="text"]::placeholder,
+.add-transaction-panel input[type="number"]::placeholder,
+.add-transaction-panel input[type="date"]::placeholder {
+  color: #b39ddb;
+  opacity: 1;
+  font-size: 0.98em;
+}
+
+@media (max-width: 600px) {
+  .add-transaction-panel { padding: 18px 8px 12px 8px; max-width: 100%; }
+}
+.portfolio-total {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #25a05a;
+  margin: 14px 0 22px 0;
 }

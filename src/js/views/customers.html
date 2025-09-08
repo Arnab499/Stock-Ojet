@@ -1,4 +1,5 @@
 <div class="oj-hybrid-padding">
+  <div class="customers-header">
   <h1>Customers</h1>
   <div>
     <oj-toolbar aria-label="Customer actions">
@@ -8,10 +9,11 @@
       <oj-button id="updBtn" on-oj-action="[[updateCust]]">Update</oj-button>
     </oj-toolbar>
   </div>
+  </div>
 
   <!-- LIST TABLE -->
   <table border="1"
-         data-bind="visible: customers().length > 0 && listCustTable() && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+         data-bind="visible: customers().length > 0 && listCustTable() && !showAddcust() && !showDeleteActions() && !showUpdateActions()">
     <thead>
       <tr>
         <th>ID</th>
@@ -36,7 +38,7 @@
 
   <!-- DELETE TABLE -->
   <table border="1"
-         data-bind="visible: customers().length > 0 && showDeleteActions() && !showAddForm()">
+         data-bind="visible: customers().length > 0 && showDeleteActions() && !showAddcust()">
     <thead>
       <tr>
         <th>ID</th>
@@ -65,7 +67,7 @@
 
   <!-- UPDATE TABLE -->
   <table border="1"
-         data-bind="visible: customers().length > 0 && showUpdateActions() && !showAddForm()">
+         data-bind="visible: customers().length > 0 && showUpdateActions() && !showAddcust()">
     <thead>
       <tr>
         <th>ID</th>
@@ -133,26 +135,27 @@
     </tbody>
   </table>
 
-  <!-- ko if: showAddForm -->
-  <div class="oj-panel" style="margin:20px 0; padding:16px;">
-    <div style="display: flex; flex-direction: column; max-width: 300px;">
-      <label>ID:</label>
-      <input data-bind="value: addCustId" />
-      <label>First Name:</label>
-      <input data-bind="value: addFirstName" />
-      <label>Last Name:</label>
-      <input data-bind="value: addLastName" />
-      <label>Phone Number:</label>
-      <input data-bind="value: addPhoneNumber" />
-      <label>City:</label>
-      <input data-bind="value: addCity" />
-      <label>Email:</label>
-      <input data-bind="value: addEmailId" />
-      <div style="margin-top: 10px;">
-        <button data-bind="click: confirmAddCust">Submit</button>
-        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
-      </div>
-    </div>
+  <!-- ko if: showAddcust -->
+  <div class="oj-panel" >
+    <div class="add-customer-panel">
+  <div class="add-customer-title">Add New Customer</div>
+  <label>ID:</label>
+  <input data-bind="value: addCustId" type="text" placeholder="Customer ID" />
+  <label>First Name:</label>
+  <input data-bind="value: addFirstName" type="text" placeholder="First Name" />
+  <label>Last Name:</label>
+  <input data-bind="value: addLastName" type="text" placeholder="Last Name" />
+  <label>Phone Number:</label>
+  <input data-bind="value: addPhoneNumber" type="text" placeholder="Phone Number" />
+  <label>City:</label>
+  <input data-bind="value: addCity" type="text" placeholder="City" />
+  <label>Email:</label>
+  <input data-bind="value: addEmailId" type="email" placeholder="Email Address" />
+  <div class="button-group">
+    <button data-bind="click: confirmAddCust">Submit</button>
+    <button data-bind="click: function(){showAddcust(false)}">Cancel</button>
+  </div>
+</div>
   </div>
   <!-- /ko -->
 </div>

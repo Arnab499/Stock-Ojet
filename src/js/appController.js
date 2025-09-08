@@ -57,7 +57,7 @@ define(['knockout', 'ojs/ojcontext', 'ojs/ojmodule-element-utils', 'ojs/ojknocko
         } else if (role === 'CUSTOMER') {
           self.navDataArray([
             { path: 'Stock', detail: { label: 'Stock', iconClass: 'oj-ux-ico-bar-chart' } },
-            { path: 'transaction', detail: { label: 'Transactions', iconClass: 'oj-ux-ico-fire' } },
+            { path: 'transaction', detail: { label: 'Dashboard', iconClass: 'oj-ux-ico-fire' } },
             { path: 'about', detail: { label: 'About', iconClass: 'oj-ux-ico-information-s' } }
           ]);
         } else {

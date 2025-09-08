@@ -14,13 +14,14 @@ self.login = function () {
   var response = {};
 
   // Hardcoded users
-  if (email === "admin@example.com" && password === "admin123") {
+  if (email === "admin@oracle.com" && password === "admin123") {
     isValid = true;
     response = { token: "dummy-admin-jwt", role: "ADMIN", userId: "adminId" };
-  } else if (email === "customer@example.com" && password === "cust123") {
+  } else if (email === "customer6@oracle.com" && password === "cust123") {
     isValid = true;
-    response = { token: "dummy-customer-jwt", role: "CUSTOMER", userId: "customerId" };
+    response = { token: "dummy-customer-jwt", role: "CUSTOMER", userId:6 };
   }
+  
 
   if (isValid) {
     sessionStorage.setItem('jwt', response.token);

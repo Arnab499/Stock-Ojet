@@ -3,16 +3,16 @@
     <h1>Stocks</h1>
     <div>
       <oj-toolbar aria-label="Stock actions">
-        <oj-button id="addStockBtn" on-oj-action="[[addStock]]">Add</oj-button>
-        <oj-button id="delStockBtn" on-oj-action="[[delStock]]">Delete</oj-button>
+        <!-- ADMIN ONLY BUTTONS -->
+        <oj-button id="addStockBtn" on-oj-action="[[addStock]]" data-bind="visible: isAdmin">Add</oj-button>
+        <oj-button id="delStockBtn" on-oj-action="[[delStock]]" data-bind="visible: isAdmin">Delete</oj-button>
         <oj-button id="listStockBtn" on-oj-action="[[listStock]]">List</oj-button>
-        <oj-button id="updStockBtn" on-oj-action="[[updateStock]]">Update</oj-button>
+        <oj-button id="updStockBtn" on-oj-action="[[updateStock]]" data-bind="visible: isAdmin">Update</oj-button>
         <oj-button on-oj-action="[[showTrendsChart]]">Trends</oj-button>
       </oj-toolbar>
     </div>
   </div>
-
-  <!-- LIST TABLE -->
+  <!-- LIST TABLE (both) -->
   <table border="1"
     data-bind="visible: stocks().length > 0 && !showAddForm() && !showDeleteActions() && !showUpdateActions() && liststk()">
     <thead>
@@ -24,6 +24,8 @@
         <th>Listing Price</th>
         <th>Listed Date</th>
         <th>Listed Exchange</th>
+        <!-- Only customer sees "Buy" action -->
+        <th data-bind="visible: isCustomer">Action</th>
       </tr>
     </thead>
     <tbody data-bind="foreach: stocks">
@@ -35,12 +37,15 @@
         <td data-bind="text: listingPrice"></td>
         <td data-bind="text: listedDate"></td>
         <td data-bind="text: listedExchange"></td>
+        <td data-bind="visible: $parent.isCustomer">
+          <button data-bind="click: function(){$parent.buyStock($data);}">Buy</button>
+        </td>
       </tr>
     </tbody>
   </table>
 
-  <!-- DELETE TABLE -->
-  <table border="1" data-bind="visible: stocks().length > 0 && showDeleteActions() && !showAddForm()">
+  <!-- ADMIN: DELETE TABLE -->
+  <table border="1" data-bind="visible: stocks().length > 0 && showDeleteActions() && !showAddForm() && isAdmin">
     <thead>
       <tr>
         <th>Stock ID</th>
@@ -68,9 +73,8 @@
       </tr>
     </tbody>
   </table>
-
-  <!-- UPDATE TABLE -->
-  <table border="1" data-bind="visible:stocks().length > 0 && showUpdateActions() && !showAddForm()">
+  <!-- ADMIN: UPDATE TABLE -->
+  <table border="1" data-bind="visible:stocks().length > 0 && showUpdateActions() && !showAddForm() && isAdmin">
     <thead>
       <tr>
         <th>Stock ID</th>
@@ -146,46 +150,65 @@
       </tr>
     </tbody>
   </table>
-  <!-- ko if: showAddForm -->
-  <div class="oj-panel" style="margin:20px 0; padding:16px;">
-    <div style="display: flex; flex-direction: column; max-width: 300px;">
-      <label>ID:</label>
-      <input type="number" data-bind="value: addStockId" />
-      <label>Name:</label>
-      <input data-bind="value: addStockName" />
+  <!-- ADMIN: ADD FORM -->
+  <!-- ko if: showAddForm() && isAdmin -->
+  <div class="add-stock-panel">
+  <div class="add-stock-title">Add New Stock</div>
+  <label>ID:</label>
+  <input type="number" data-bind="value: addStockId" placeholder="Stock ID" />
+  <label>Name:</label>
+  <input type="text" data-bind="value: addStockName" placeholder="Stock Name" />
+  <label>Price:</label>
+  <input type="number" data-bind="value: addStockPrice" placeholder="Price" />
+  <label>Volume:</label>
+  <input type="number" data-bind="value: addStockVolume" placeholder="Volume" />
+  <label>Listing Price:</label>
+  <input type="number" data-bind="value: addListingPrice" placeholder="Listing Price" />
+  <label>Listed Date:</label>
+  <input type="date" data-bind="value: addListedDate" placeholder="Listed Date" />
+  <label>Listed Exchange:</label>
+  <input type="text" data-bind="value: addListedExchange" placeholder="Listed Exchange" />
+  <div class="button-group">
+    <button data-bind="click: confirmAddStock">Submit</button>
+    <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+  </div>
+</div>
+  <!-- /ko -->
+
+  <!-- CUSTOMER: BUY FORM DIALOG -->
+  <!-- ko if: showBuyForm -->
+  <div class="oj-panel" style="margin:20px 0; padding:16px; background:#eef;">
+    <h4>Buy Stock: <span data-bind="text: buyStockObj() && buyStockObj().stockName"></span></h4>
+    <div style="display: flex; flex-direction: column; max-width: 260px;">
+      <label>Stock ID:</label>
+      <span data-bind="text: buyStockObj() && buyStockObj().stockId"></span>
       <label>Price:</label>
-      <oj-input-number value="{{addStockPrice}}" converter="[[priceConverter]]"></oj-input-number>
-      <input data-bind="value: addStockPrice" />
-      <label>Volume:</label>
-      <input data-bind="value: addStockVolume" />
-      <label>Listing Price:</label>
-      <input data-bind="value: addListingPrice" />
-      <label>Listed Date:</label>
-      <input type="date" data-bind="value: addListedDate" />
-      <label>Listed Exchange:</label>
-      <input data-bind="value: addListedExchange" />
+      <span data-bind="text: buyStockObj() && buyStockObj().stockPrice"></span>
+      <label>Qty:</label>
+      <input type="number" min="1" data-bind="value: buyQty" />
       <div style="margin-top: 10px;">
-        <button data-bind="click: confirmAddStock">Submit</button>
-        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+        <button data-bind="click: confirmBuy">Buy</button>
+        <button data-bind="click: cancelBuy">Cancel</button>
       </div>
     </div>
   </div>
   <!-- /ko -->
+
   <!-- STOCKS PRICE COMPARISON CHART -->
   <div data-bind="visible: showTrends">
-  <div style="margin-bottom:32px;">
-  <oj-chart id="stocksBarChart"
-            type="bar"
-            orientation="vertical"
-            series="[[chartSeries]]"
-            groups="[[chartGroups]]"
-            animation-on-display="auto"
-            animation-on-data-change="auto"
-            style="height:330px;">
-    <template slot="seriesTemplate" data-oj-as="item">
-      <oj-chart-series color="[[item.seriesIndex === 0 ? '#29b6f6' : '#66bb6a']]"></oj-chart-series>
-    </template>
-  </oj-chart>
-</div>
+    <div style="margin-bottom:32px;">
+      <oj-chart id="stocksBarChart"
+                type="bar"
+                orientation="vertical"
+                series="[[chartSeries]]"
+                groups="[[chartGroups]]"
+                animation-on-display="auto"
+                animation-on-data-change="auto"
+                style="height:330px;">
+        <template slot="seriesTemplate" data-oj-as="item">
+          <oj-chart-series color="[[item.seriesIndex === 0 ? '#29b6f6' : '#66bb6a']]"></oj-chart-series>
+        </template>
+      </oj-chart>
+    </div>
   </div>
 </div>

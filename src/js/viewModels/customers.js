@@ -3,7 +3,7 @@ define(['../accUtils', 'knockout'],
     function CustomerViewModel() {
       // Observables for managing customers and UI state
       this.customers = ko.observableArray([]);
-      this.showAddForm = ko.observable(false);
+      this.showAddcust = ko.observable(false);
       this.showDeleteActions = ko.observable(false);
       this.showUpdateActions = ko.observable(false);
       this.listCustTable = ko.observable(true);
@@ -28,7 +28,7 @@ define(['../accUtils', 'knockout'],
 
       // List customers
       this.listCust = function () {
-        this.showAddForm(false);
+        this.showAddcust(false);
         this.showDeleteActions(false);
         this.showUpdateActions(false);
         this.listCustTable(true);
@@ -49,7 +49,7 @@ define(['../accUtils', 'knockout'],
 
       // Add Customer Actions
       this.addCust = function () {
-        this.showAddForm(true);
+        this.showAddcust(true);
         this.showDeleteActions(false);
         this.showUpdateActions(false);
         this.listCustTable(false);
@@ -78,7 +78,7 @@ define(['../accUtils', 'knockout'],
           .then(r => {
             if (r.status === 201) {
               alert('Customer added!');
-              this.showAddForm(false);
+              this.showAddcust(false);
               this.listCust();
             } else if (r.status === 409) {
               alert('Customer already exists with this ID.');
@@ -91,7 +91,7 @@ define(['../accUtils', 'knockout'],
 
       // Delete Customer Actions
       this.delCust = function () {
-        this.showAddForm(false);
+        this.showAddcust(false);
         this.showDeleteActions(true);
         this.showUpdateActions(false);
         this.listCustTable(false);
@@ -124,7 +124,7 @@ define(['../accUtils', 'knockout'],
 
       // Update Customer Actions
       this.updateCust = function () {
-        this.showAddForm(false);
+        this.showAddcust(false);
         this.showDeleteActions(false);
         this.showUpdateActions(true);
         this.listCustTable(false);

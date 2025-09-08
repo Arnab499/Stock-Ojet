@@ -1,17 +1,90 @@
 <div class="oj-hybrid-padding">
-  <h1>Transactions</h1>
-  <div>
-    <oj-toolbar aria-label="Transaction actions">
-      <oj-button id="addTxnBtn" on-oj-action="[[addTransaction]]">Add</oj-button>
-      <oj-button id="delTxnBtn" on-oj-action="[[delTransaction]]">Delete</oj-button>
-      <oj-button id="listTxnBtn" on-oj-action="[[listTransaction]]">List</oj-button>
-      <oj-button id="updTxnBtn" on-oj-action="[[updateTransaction]]">Update</oj-button>
-    </oj-toolbar>
+  <div class="transactions-header">
+    <h1 data-bind="visible: isAdmin">Transactions</h1>
+    <h1 data-bind="visible: isCustomer">Dashboard</h1>
+    <div>
+      <oj-toolbar aria-label="Transaction actions">
+        <oj-button id="addTxnBtn" on-oj-action="[[addTransaction]]" data-bind="visible: isAdmin">Add</oj-button>
+        <oj-button id="delTxnBtn" on-oj-action="[[delTransaction]]" data-bind="visible: isAdmin">Delete</oj-button>
+        <oj-button id="listTxnBtn" on-oj-action="[[listTransaction]]">List</oj-button>
+        <oj-button id="updTxnBtn" on-oj-action="[[updateTransaction]]" data-bind="visible: isAdmin">Update</oj-button>
+        <oj-button id="portfolioBtn" on-oj-action="[[showPortfolioChart]]" data-bind="visible: isCustomer">Portfolio</oj-button>
+        <oj-button id="sellTabBtn" on-oj-action="[[showSellStocks]]" data-bind="visible: isCustomer">Sell</oj-button>
+      </oj-toolbar>
+    </div>
   </div>
 
-  <!-- LIST TABLE -->
+  <!-- Customer Portfolio Chart (by button) -->
+  <!-- ko if: showPortfolio() && isCustomer && !listTxnTable() -->
+  <div style="margin:20px;">
+    <h3>Portfolio Distribution</h3>
+    <div class="portfolio-total">
+      Total Portfolio Value: <span data-bind="text: totalPortfolioValue"></span>
+    </div>
+    <oj-chart type="pie"
+              animation-on-display="auto"
+              style="height:250px"
+              series="[[chartPieSeries]]">
+      <template slot="seriesTemplate" data-oj-as="item">
+        <oj-chart-series color="#42a5f5"></oj-chart-series>
+      </template>
+    </oj-chart>
+  </div>
+  <!-- /ko -->
+
+  <!-- CUSTOMER: SELL HOLDINGS TABLE -->
+  <!-- ko if: showSellTab -->
+  <div style="margin:20px 0;">
+    <h3>Sell Holdings</h3>
+    <table border="1" style="width:100%">
+      <thead>
+        <tr>
+          <th>Stock ID</th>
+          <th>Stock Name</th>
+          <th>Current Price</th>
+          <th>Owned Quantity</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody data-bind="foreach: customerHoldings">
+        <tr>
+          <td data-bind="text: stockId"></td>
+          <td data-bind="text: stockName"></td>
+          <td data-bind="text: stockPrice"></td>
+          <td data-bind="text: ownedQty"></td>
+          <td>
+            <button data-bind="click: function(){$parent.startSellStock($data);}">Sell</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <!-- /ko -->
+
+  <!-- SELL FORM DIALOG -->
+  <!-- ko if: showSellForm -->
+  <div class="oj-panel" style="margin:20px 0; padding:16px;">
+    <h4>Sell Stock: <span data-bind="text: sellingStockObj() && sellingStockObj().stockName"></span></h4>
+    <div style="display: flex; flex-direction: column; max-width: 260px;">
+      <label>Stock ID:</label>
+      <span data-bind="text: sellingStockObj() && sellingStockObj().stockId"></span>
+      <label>Current Price:</label>
+      <span data-bind="text: sellingStockObj() && sellingStockObj().stockPrice"></span>
+      <label>Available Qty:</label>
+      <span data-bind="text: sellingStockObj() && sellingStockObj().ownedQty"></span>
+      <label>Qty to Sell:</label>
+      <input type="number" min="1" data-bind="value: sellQty" />
+      <div style="margin-top: 10px;">
+        <button data-bind="click: confirmSellStock">Sell</button>
+        <button data-bind="click: cancelSellStock">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <!-- /ko -->
+
+  <!-- Transaction List Table (not visible when portfolio or sell tab is showing) -->
   <table border="1"
-         data-bind="visible: transactions().length > 0 && listTxnTable() && !showAddForm() && !showDeleteActions() && !showUpdateActions()">
+         data-bind="visible: transactions().length > 0 && !showPortfolio() && listTxnTable() && !showAddtrans() && !showDeleteActions() && !showUpdateActions() && !showSellTab()">
     <thead>
       <tr>
         <th>Transaction ID</th>
@@ -36,9 +109,9 @@
     </tbody>
   </table>
 
-  <!-- DELETE TABLE -->
+  <!-- DELETE TABLE (ADMIN ONLY) -->
   <table border="1"
-         data-bind="visible: transactions().length > 0 && showDeleteActions() && !showAddForm()">
+         data-bind="visible: transactions().length > 0 && showDeleteActions() && !showAddtrans() && isAdmin">
     <thead>
       <tr>
         <th>Transaction ID</th>
@@ -67,9 +140,9 @@
     </tbody>
   </table>
 
-  <!-- UPDATE TABLE -->
+  <!-- UPDATE TABLE (ADMIN ONLY) -->
   <table border="1"
-         data-bind="visible: transactions().length > 0 && showUpdateActions() && !showAddForm()">
+         data-bind="visible: transactions().length > 0 && showUpdateActions() && !showAddtrans() && isAdmin">
     <thead>
       <tr>
         <th>Transaction ID</th>
@@ -146,28 +219,29 @@
     </tbody>
   </table>
 
-  <!-- ko if: showAddForm -->
-  <div class="oj-panel" style="margin:20px 0; padding:16px;">
-    <div style="display: flex; flex-direction: column; max-width: 300px;">
-      <label>Transaction ID:</label>
-      <input data-bind="value: addTxnId" />
+  <!-- ADD FORM (admin only) -->
+  <!-- ko if: showAddtrans() && isAdmin -->
+  <div class="oj-panel">
+    <div class="add-transaction-panel">
+      <div class="add-transaction-title">Add New Transaction</div>
       <label>Customer ID:</label>
-      <input data-bind="value: addCustId" />
+      <input data-bind="value: addCustId" type="text" placeholder="Customer ID" />
       <label>Stock ID:</label>
-      <input data-bind="value: addStockId" />
+      <input data-bind="value: addStockId" type="text" placeholder="Stock ID" />
       <label>Transaction Price:</label>
-      <input type="number" data-bind="value: addTxnPrice" />
+      <input data-bind="value: addTxnPrice" type="number" placeholder="Price" />
       <label>Transaction Type:</label>
-      <input data-bind="value: addTxnType" />
+      <input data-bind="value: addTxnType" type="text" placeholder="Type (e.g., BUY, SELL)" />
       <label>Quantity:</label>
-      <input type="number" data-bind="value: addQty" />
+      <input data-bind="value: addQty" type="number" placeholder="Quantity" />
       <label>Transaction Date:</label>
-      <input type="date" data-bind="value: addTxnDate" />
-      <div style="margin-top: 10px;">
+      <input data-bind="value: addTxnDate" type="date" placeholder="Date" />
+      <div class="button-group">
         <button data-bind="click: confirmAddTransaction">Submit</button>
-        <button data-bind="click: function(){showAddForm(false)}">Cancel</button>
+        <button data-bind="click: function(){showAddtrans(false)}">Cancel</button>
       </div>
     </div>
   </div>
   <!-- /ko -->
+
 </div>

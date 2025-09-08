@@ -1,27 +1,48 @@
-define(['../accUtils', 'knockout'],
-  function (accUtils, ko) {
+define(['../accUtils', 'knockout', 'ojs/ojchart'],
+  function(accUtils, ko) {
     function TransactionViewModel() {
-      // Data
-      this.transactions = ko.observableArray([]);
+      var self = this;
 
-      // UI state
-      this.showAddForm = ko.observable(false);
-      this.showDeleteActions = ko.observable(false);
-      this.showUpdateActions = ko.observable(false);
-      this.listTxnTable = ko.observable(true);
-      this.editingTxnId = ko.observable(null);
+      // -------------------- DATA & ROLE --------------------
+      self.transactions = ko.observableArray([]);
+      self.isAdmin = ko.observable(false);
+      self.isCustomer = ko.observable(false);
+      self.userId = ko.observable();
 
-      // Add form observables
-      this.addTxnId = ko.observable();
-      this.addCustId = ko.observable();
-      this.addStockId = ko.observable();
-      this.addTxnPrice = ko.observable();
-      this.addTxnType = ko.observable();
-      this.addQty = ko.observable();
-      this.addTxnDate = ko.observable();
+      // Chart
+      self.chartPieSeries = ko.observableArray([]);
+      self.totalPortfolioValue = ko.observable(0);
 
-      // Edit form temp
-      this.editTemp = {
+      // ---------- SELL Tab/form related state ----------
+      self.showSellTab = ko.observable(false);         // Show/hide the Sell tab
+      self.customerHoldings = ko.observableArray([]);  // Stocks customer owns with qty
+      self.sellingStockObj = ko.observable({});
+      self.sellQty = ko.observable(1);
+      self.showSellForm = ko.observable(false);
+
+      // -------------------- UI State --------------------
+      self.showAddtrans = ko.observable(false);
+      self.showDeleteActions = ko.observable(false);
+      self.showUpdateActions = ko.observable(false);
+      self.listTxnTable = ko.observable(true);
+      self.editingTxnId = ko.observable(null);
+      self.showPortfolio = ko.observable(false);
+
+      // --------------- CHART DATA ------------------
+      self.chartGroups = ko.observableArray([]); // For dates
+      self.chartSeries = ko.observableArray([]); // For price etc.
+
+      // --------------- ADD FORM (ADMIN) ------------
+      self.addTxnId = ko.observable();
+      self.addCustId = ko.observable();
+      self.addStockId = ko.observable();
+      self.addTxnPrice = ko.observable();
+      self.addTxnType = ko.observable();
+      self.addQty = ko.observable();
+      self.addTxnDate = ko.observable();
+
+      // --------------- EDIT FORM -------------------
+      self.editTemp = {
         custId: ko.observable(),
         stockId: ko.observable(),
         txnPrice: ko.observable(),
@@ -30,51 +51,77 @@ define(['../accUtils', 'knockout'],
         txnDate: ko.observable()
       };
 
-      // List transactions
-      this.listTransaction = function () {
-        this.showAddForm(false);
-        this.showDeleteActions(false);
-        this.showUpdateActions(false);
-        this.listTxnTable(true);
+      // --------------- ROLE INIT -------------------
+      self.setRole = function() {
+        var role = sessionStorage.getItem('role');
+        self.isAdmin(role === 'ADMIN');
+        self.isCustomer(role === 'CUSTOMER');
+        self.userId(sessionStorage.getItem('userId'));
+      };
+
+      // ------------- TRANSACTION LOADER -------------
+      self.loadTransactions = function (callback) {
         fetch("http://localhost:8080/transactions")
           .then(response => {
             if (!response.ok) throw new Error("Network response was not ok");
             return response.json();
           })
           .then(data => {
-            this.transactions(Array.isArray(data) ? data : []);
+            let result = Array.isArray(data) ? data : [];
+            if (self.isCustomer()) {
+              let uid = parseInt(self.userId(), 10);
+              result = result.filter(txn => parseInt(txn.custId, 10) === uid);
+            }
+            self.transactions(result);
+            if (callback) callback(result);
           })
           .catch(error => {
             console.error("Error fetching transactions:", error);
             alert("Failed to load transactions");
-            this.transactions([]);
+            self.transactions([]);
           });
-      }.bind(this);
+      };
 
-      // Add
-      this.addTransaction = function () {
-        this.showAddForm(true);
-        this.showDeleteActions(false);
-        this.showUpdateActions(false);
-        this.listTxnTable(false);
-        this.addTxnId('');
-        this.addCustId('');
-        this.addStockId('');
-        this.addTxnPrice('');
-        this.addTxnType('');
-        this.addQty('');
-        this.addTxnDate('');
-      }.bind(this);
+      // ------------ LIST transactions (default view) -------------
+      self.listTransaction = function () {
+        self.showAddtrans(false);
+        self.showDeleteActions(false);
+        self.showUpdateActions(false);
+        self.listTxnTable(true);
+        self.showPortfolio(false);
+        self.showSellTab(false);
+        self.showSellForm(false);
+        self.loadTransactions();
+      };
 
-      this.confirmAddTransaction = function () {
+      // ------------ ADMIN: Add Transaction -------------
+      self.addTransaction = function () {
+        if (!self.isAdmin()) return;
+        self.showAddtrans(true);
+        self.showDeleteActions(false);
+        self.showUpdateActions(false);
+        self.listTxnTable(false);
+        self.showPortfolio(false);
+        self.showSellTab(false);
+        self.showSellForm(false);
+        self.addTxnId('');
+        self.addCustId('');
+        self.addStockId('');
+        self.addTxnPrice('');
+        self.addTxnType('');
+        self.addQty('');
+        self.addTxnDate('');
+      };
+
+      self.confirmAddTransaction = function () {
         const txnObj = {
-          txnId: this.addTxnId(),
-          custId: this.addCustId(),
-          stockId: this.addStockId(),
-          txnPrice: parseFloat(this.addTxnPrice()),
-          txnType: this.addTxnType(),
-          qty: parseInt(this.addQty()),
-          txnDate: this.addTxnDate()
+          // txnId is auto-generated by backend
+          custId: parseInt(self.addCustId(), 10),
+          stockId: parseInt(self.addStockId(), 10),
+          txnPrice: parseFloat(self.addTxnPrice()),
+          txnType: self.addTxnType(),
+          qty: parseInt(self.addQty(), 10),
+          txnDate: self.addTxnDate()
         };
         fetch('http://localhost:8080/transactions', {
           method: 'POST',
@@ -84,8 +131,8 @@ define(['../accUtils', 'knockout'],
           .then(r => {
             if (r.status === 201) {
               alert('Transaction added!');
-              this.showAddForm(false);
-              this.listTransaction();
+              self.showAddtrans(false);
+              self.listTransaction();
             } else if (r.status === 409) {
               alert('Transaction already exists with this ID.');
             } else {
@@ -93,21 +140,22 @@ define(['../accUtils', 'knockout'],
             }
           })
           .catch(() => alert('Add failed!'));
-      }.bind(this);
+      };
 
-      // Delete
-      this.delTransaction = function () {
-        this.showAddForm(false);
-        this.showDeleteActions(true);
-        this.showUpdateActions(false);
-        this.listTxnTable(false);
-        fetch("http://localhost:8080/transactions")
-          .then(response => response.json())
-          .then(data => this.transactions(Array.isArray(data) ? data : []))
-          .catch(() => this.transactions([]));
-      }.bind(this);
+      // ------------ ADMIN: Delete -------------
+      self.delTransaction = function () {
+        if (!self.isAdmin()) return;
+        self.showAddtrans(false);
+        self.showDeleteActions(true);
+        self.showUpdateActions(false);
+        self.listTxnTable(false);
+        self.showPortfolio(false);
+        self.showSellTab(false);
+        self.showSellForm(false);
+        self.loadTransactions();
+      };
 
-      this.deleteByRow = function (txn) {
+      self.deleteByRow = function (txn) {
         if (!confirm(`Delete transaction with ID ${txn.txnId}?`)) return;
         fetch('http://localhost:8080/transactions/' + txn.txnId, {
           method: 'DELETE'
@@ -115,7 +163,7 @@ define(['../accUtils', 'knockout'],
           .then(response => {
             if (response.ok) {
               alert("Transaction deleted successfully");
-              this.delTransaction();
+              self.delTransaction();
             } else if (response.status === 404) {
               alert("Transaction not found");
             } else {
@@ -126,41 +174,40 @@ define(['../accUtils', 'knockout'],
             alert("Error deleting transaction");
             console.error(error);
           });
-      }.bind(this);
+      };
 
-      // Update
-      this.updateTransaction = function () {
-        this.showAddForm(false);
-        this.showDeleteActions(false);
-        this.showUpdateActions(true);
-        this.listTxnTable(false);
-        this.editingTxnId(null);
-        fetch("http://localhost:8080/transactions")
-          .then(response => response.json())
-          .then(data => this.transactions(Array.isArray(data) ? data : []))
-          .catch(() => this.transactions([]));
-      }.bind(this);
-
-      this.editTxnRow = function (txn) {
-        this.editingTxnId(txn.txnId);
-        this.editTemp.custId(txn.custId);
-        this.editTemp.stockId(txn.stockId);
-        this.editTemp.txnPrice(txn.txnPrice);
-        this.editTemp.txnType(txn.txnType);
-        this.editTemp.qty(txn.qty);
-        this.editTemp.txnDate(txn.txnDate);
-      }.bind(this);
-
-      this.confirmEditTransaction = function (txn) {
+      // ------------ ADMIN: Update -------------
+      self.updateTransaction = function () {
+        if (!self.isAdmin()) return;
+        self.showAddtrans(false);
+        self.showDeleteActions(false);
+        self.showUpdateActions(true);
+        self.listTxnTable(false);
+        self.editingTxnId(null);
+        self.showPortfolio(false);
+        self.showSellTab(false);
+        self.showSellForm(false);
+        self.loadTransactions();
+      };
+      self.editTxnRow = function (txn) {
+        self.editingTxnId(txn.txnId);
+        self.editTemp.custId(txn.custId);
+        self.editTemp.stockId(txn.stockId);
+        self.editTemp.txnPrice(txn.txnPrice);
+        self.editTemp.txnType(txn.txnType);
+        self.editTemp.qty(txn.qty);
+        self.editTemp.txnDate(txn.txnDate);
+      };
+      self.confirmEditTransaction = function (txn) {
         const id = txn.txnId;
         const updated = {
           txnId: id,
-          custId: this.editTemp.custId(),
-          stockId: this.editTemp.stockId(),
-          txnPrice: parseFloat(this.editTemp.txnPrice()),
-          txnType: this.editTemp.txnType(),
-          qty: parseInt(this.editTemp.qty()),
-          txnDate: this.editTemp.txnDate()
+          custId: parseInt(self.editTemp.custId(), 10),
+          stockId: parseInt(self.editTemp.stockId(), 10),
+          txnPrice: parseFloat(self.editTemp.txnPrice()),
+          txnType: self.editTemp.txnType(),
+          qty: parseInt(self.editTemp.qty(), 10),
+          txnDate: self.editTemp.txnDate()
         };
         fetch('http://localhost:8080/transactions/' + id, {
           method: 'PUT',
@@ -170,8 +217,8 @@ define(['../accUtils', 'knockout'],
           .then(r => {
             if (r.ok) {
               alert('Transaction updated!');
-              this.editingTxnId(null);
-              this.updateTransaction();
+              self.editingTxnId(null);
+              self.updateTransaction();
             } else if (r.status === 404) {
               alert('Transaction not found.');
             } else {
@@ -179,22 +226,153 @@ define(['../accUtils', 'knockout'],
             }
           })
           .catch(() => alert('Update failed!'));
-      }.bind(this);
+      };
+      self.cancelEditTransaction = function () {
+        self.editingTxnId(null);
+      };
 
-      this.cancelEditTransaction = function () {
-        this.editingTxnId(null);
-      }.bind(this);
+      // --------------- PORTFOLIO CHART ------------------
+      self.showPortfolioChart = function () {
+        if (!self.isCustomer()) return;
+        self.showPortfolio(true);
+        self.showAddtrans(false);
+        self.showDeleteActions(false);
+        self.showUpdateActions(false);
+        self.listTxnTable(false);
+        self.showSellTab(false);
+        self.showSellForm(false);
+        self.loadTransactions(function(filtered) { self.buildPortfolioChart(filtered); });
+      };
 
-      // Lifecycle
-      this.connected = () => {
+      // ----------- BUILD CHART (portfolio) --------------
+      self.buildPortfolioChart = function (txns) {
+        var stockWorthMap = {};
+        txns.forEach(t => {
+          var stockId = t.stockId;
+          var val = parseFloat(t.txnPrice) * parseInt(t.qty, 10);
+          if (t.txnType === "SELL") val = -val;
+          stockWorthMap[stockId] = (stockWorthMap[stockId] || 0) + val;
+        });
+        var total = Object.values(stockWorthMap).reduce((a, b) => a + b, 0);
+        self.totalPortfolioValue(total);
+
+        var uniqueStockIds = Object.keys(stockWorthMap);
+
+        var fetches = uniqueStockIds.map(stockId =>
+          fetch('http://localhost:8080/stocks/' + stockId)
+            .then(r => r.ok ? r.json() : { stockName: 'Stock ' + stockId })
+            .then(stockData => ({
+              id: stockId,
+              name: stockData.stockName || stockData.name || ('Stock ' + stockId)
+            }))
+            .catch(() => ({ id: stockId, name: 'Stock ' + stockId }))
+        );
+
+        Promise.all(fetches).then(stockInfos => {
+          var series = stockInfos.map(info => ({
+            name: info.name,
+            items: [stockWorthMap[info.id]]
+          }));
+          self.chartPieSeries(series);
+        });
+      };
+
+      // ------------------- CUSTOMER: SELL TAB -------------------
+      self.showSellStocks = function () {
+        self.showSellTab(true);
+        self.showPortfolio(false);
+        self.showAddtrans(false);
+        self.showDeleteActions(false);
+        self.showUpdateActions(false);
+        self.listTxnTable(false);
+        self.showSellForm(false);
+
+        // Load ALL transactions, filter for user, then aggregate holdings per stock
+        fetch("http://localhost:8080/transactions")
+          .then(r => r.json())
+          .then(allTxns => {
+            var uid = parseInt(self.userId(), 10);
+            var myTxns = allTxns.filter(t => Number(t.custId) === uid);
+            var holdings = {};
+            myTxns.forEach(t => {
+              var stockId = t.stockId;
+              var qty = parseInt(t.qty, 10);
+              if (t.txnType === "BUY") holdings[stockId] = (holdings[stockId] || 0) + qty;
+              if (t.txnType === "SELL") holdings[stockId] = (holdings[stockId] || 0) - qty;
+            });
+            // Remove stocks with <= 0 qty (not owned)
+            Object.keys(holdings).forEach(id => { if (holdings[id] <= 0) delete holdings[id]; });
+            // For each owned stock, fetch its info
+            Promise.all(Object.keys(holdings).map(stockId =>
+              fetch('http://localhost:8080/stocks/' + stockId)
+                .then(r => r.ok ? r.json() : null)
+                .then(stock => stock ? Object.assign(stock, { ownedQty: holdings[stockId] }) : null)
+            )).then(stockObjs => {
+              var cleaned = stockObjs.filter(x => !!x);
+              self.customerHoldings(cleaned);
+            });
+          });
+      };
+
+      self.startSellStock = function (stock) {
+        self.sellingStockObj(stock);
+        self.sellQty(1);
+        self.showSellForm(true);
+      };
+
+      self.confirmSellStock = function () {
+        var stock = self.sellingStockObj();
+        var qtyToSell = parseInt(self.sellQty(), 10);
+        if (qtyToSell < 1 || qtyToSell > stock.ownedQty) {
+          alert("Invalid quantity!");
+          return;
+        }
+        var txn = {
+          custId: self.userId(),
+          stockId: stock.stockId,
+          txnPrice: stock.stockPrice,
+          txnType: "SELL",
+          qty: qtyToSell,
+          txnDate: (new Date()).toISOString().substring(0, 10)
+        };
+        // 1. Post SELL transaction
+        fetch('http://localhost:8080/transactions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(txn)
+        }).then(r => {
+          if (r.status === 201) {
+            // 2. Update stock volume (increase)
+            fetch('http://localhost:8080/stocks/' + stock.stockId, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(Object.assign({}, stock, {
+                stockVolume: parseInt(stock.stockVolume, 10) + qtyToSell
+              }))
+            }).then(() => {
+              alert('Sell successful!');
+              self.showSellForm(false);
+              self.showSellStocks();
+            });
+          } else {
+            r.text().then(txt => alert('Sell failed: ' + txt));
+          }
+        }).catch(() => alert('Sell failed!'));
+      };
+      self.cancelSellStock = function () {
+        self.showSellForm(false);
+      };
+
+      // --------------- LIFECYCLE ---------------
+      self.connected = () => {
+        self.setRole();
         accUtils.announce('Transactions page loaded.', 'assertive');
         document.title = "Transactions";
-        this.listTransaction();
+        self.listTransaction();
       };
-      this.disconnected = () => {};
-      this.transitionCompleted = () => {};
+      self.disconnected = () => { };
+      self.transitionCompleted = () => { };
     }
-
     return TransactionViewModel;
   }
 );
